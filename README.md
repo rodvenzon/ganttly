@@ -106,3 +106,7 @@ One-time setup:
 To publish: Workers & Pages -> your project -> Create deployment -> upload `ganttly-pages.zip`, or run `wrangler pages deploy out`.
 
 Each save is a single D1 batch guarded by `Project.revision`: if someone else saved in between, nothing is written and the client reloads the latest plan. See `src/server/mutate.ts`.
+
+## License
+
+MIT. See [LICENSE](LICENSE).
