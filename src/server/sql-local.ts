@@ -1,5 +1,6 @@
 import { createClient, type Client, type InValue } from "@libsql/client";
-import { resolve } from "node:path";
+import { mkdirSync } from "node:fs";
+import { dirname, resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 import type { SqlDb, SqlStatement, SqlValue } from "./sql";
 class LocalStatement implements SqlStatement {
@@ -27,9 +28,12 @@ class LocalStatement implements SqlStatement {
 }
 /** A D1-shaped database over a local SQLite file, for development and tests. */
 export function localDb(raw = process.env.DATABASE_URL ?? "file:./dev.db") {
-  const url = raw.startsWith("file:")
-    ? pathToFileURL(resolve("data", raw.slice(5))).href
-    : raw;
+  let url = raw;
+  if (raw.startsWith("file:")) {
+    const file = resolve("data", raw.slice(5));
+    mkdirSync(dirname(file), { recursive: true }); // first run on a fresh clone
+    url = pathToFileURL(file).href;
+  }
   const client = createClient({ url });
   const db: SqlDb & { close(): void } = {
     prepare: (sql) => new LocalStatement(client, sql),
