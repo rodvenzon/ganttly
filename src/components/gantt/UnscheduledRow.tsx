@@ -1,3 +1,4 @@
+import { calendarOf } from "@/lib/scheduling/calendar";
 import { useRef, useEffect, type PointerEvent } from "react";
 import type { ProjectDetail, Task } from "@/lib/types";
 import { ROW_HEIGHT, type Zoom } from "@/lib/scheduling/constants";
@@ -53,11 +54,17 @@ export function UnscheduledRow({
     if (last.current === next) return;
     last.current = next;
     try {
-      const patch = drawRange(first.current, last.current, task.isMilestone);
+      const patch = drawRange(
+        first.current,
+        last.current,
+        task.isMilestone,
+        calendarOf(project),
+      );
       setPreview(
         cascade(
           project.tasks.map((t) => (t.id === task.id ? { ...t, ...patch } : t)),
           project.dependencies,
+          calendarOf(project),
         ),
       );
     } catch (error) {
@@ -69,7 +76,12 @@ export function UnscheduledRow({
       void commit({
         type: "task.update",
         id: task.id,
-        patch: drawRange(first.current, last.current, task.isMilestone),
+        patch: drawRange(
+          first.current,
+          last.current,
+          task.isMilestone,
+          calendarOf(project),
+        ),
       });
     first.current = null;
     last.current = null;

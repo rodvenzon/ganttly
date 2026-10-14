@@ -14,6 +14,7 @@ import type { Zoom } from "@/lib/scheduling/constants";
 import { ZOOMS, ROW_HEIGHT } from "@/lib/scheduling/constants";
 import { snapToDay } from "@/lib/scheduling/geometry";
 import { moveTask, resizeTask, cascade } from "@/lib/scheduling/cascade";
+import { calendarOf } from "@/lib/scheduling/calendar";
 import { useUI } from "@/store/ui";
 import { useProjectActions } from "@/lib/api/use-project-actions";
 type DragKind = "move" | "start" | "end" | "row";
@@ -55,9 +56,10 @@ export function useChartDrag(project: ProjectDetail, zoom: Zoom) {
   function changed(delta: number) {
     const a = active.current;
     if (!a || a.kind === "row") return null;
+    const cal = calendarOf(project);
     return a.kind === "move"
-      ? moveTask(a.task, delta)
-      : resizeTask(a.task, a.kind, delta);
+      ? moveTask(a.task, delta, cal)
+      : resizeTask(a.task, a.kind, delta, cal);
   }
   function onDragMove(event: DragMoveEvent) {
     const a = active.current;
@@ -71,6 +73,7 @@ export function useChartDrag(project: ProjectDetail, zoom: Zoom) {
           cascade(
             project.tasks.map((t) => (t.id === task.id ? task : t)),
             project.dependencies,
+            calendarOf(project),
           ),
         );
         a.days = days;

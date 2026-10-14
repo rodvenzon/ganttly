@@ -1,7 +1,25 @@
 import type { Task, Dependency } from "@/lib/types";
 import { addWholeDays, daysBetween, assertRange } from "./dates";
 import { topological } from "./graph";
-export function cascade(tasks: Task[], dependencies: Dependency[]): Task[] {
+import {
+  CALENDAR_DAYS,
+  endAfter,
+  nextWorkday,
+  onWorkdays,
+  workdaysIn,
+  type WorkCalendar,
+} from "./calendar";
+/** Moves a task to start on `start`, keeping its length in (working) days. */
+function shiftTo(task: Task, start: string, cal: WorkCalendar) {
+  const days = workdaysIn(task.startDate!, task.endDate!, cal);
+  return { ...task, startDate: start, endDate: endAfter(start, days, cal) };
+}
+/** With skipWeekends, also pulls every task onto weekdays. */
+export function cascade(
+  tasks: Task[],
+  dependencies: Dependency[],
+  cal: WorkCalendar = CALENDAR_DAYS,
+): Task[] {
   const byId = new Map(tasks.map((t) => [t.id, { ...t }])),
     predecessors = new Map<string, string[]>();
   for (const d of dependencies)
@@ -13,25 +31,42 @@ export function cascade(tasks: Task[], dependencies: Dependency[]): Task[] {
     const task = byId.get(id)!;
     assertRange(task.startDate, task.endDate, task.isMilestone);
     if (!task.startDate || !task.endDate) continue;
-    let earliest = task.startDate;
+    Object.assign(
+      task,
+      onWorkdays(task.startDate, task.endDate, cal, task.isMilestone),
+    );
+    let earliest = task.startDate!;
     for (const parentId of predecessors.get(id) ?? []) {
       const end = byId.get(parentId)?.endDate;
-      if (end && addWholeDays(end, 1) > earliest)
-        earliest = addWholeDays(end, 1);
+      const after = end && nextWorkday(addWholeDays(end, 1), cal);
+      if (after && after > earliest) earliest = after;
     }
-    if (earliest > task.startDate) {
-      task.endDate = addWholeDays(
-        task.endDate,
-        daysBetween(earliest, task.startDate),
-      );
-      task.startDate = earliest;
+    if (earliest > task.startDate!) {
+      if (cal.skipWeekends) Object.assign(task, shiftTo(task, earliest, cal));
+      else {
+        task.endDate = addWholeDays(
+          task.endDate!,
+          daysBetween(earliest, task.startDate!),
+        );
+        task.startDate = earliest;
+      }
       assertRange(task.startDate, task.endDate, task.isMilestone);
     }
   }
   return tasks.map((t) => byId.get(t.id)!);
 }
-export function moveTask(task: Task, days: number): Task {
+export function moveTask(
+  task: Task,
+  days: number,
+  cal: WorkCalendar = CALENDAR_DAYS,
+): Task {
   if (!task.startDate || !task.endDate) return task;
+  if (cal.skipWeekends) {
+    const start = nextWorkday(addWholeDays(task.startDate, days), cal);
+    const next = shiftTo(task, start, cal);
+    assertRange(next.startDate, next.endDate, next.isMilestone);
+    return next;
+  }
   const next = {
     ...task,
     startDate: addWholeDays(task.startDate, days),
@@ -44,6 +79,7 @@ export function resizeTask(
   task: Task,
   edge: "start" | "end",
   days: number,
+  cal: WorkCalendar = CALENDAR_DAYS,
 ): Task {
   if (!task.startDate || !task.endDate || task.isMilestone) return task;
   const start =
@@ -56,11 +92,18 @@ export function resizeTask(
   };
   if (edge === "start") next.endDate = task.endDate;
   else next.startDate = task.startDate;
+  if (cal.skipWeekends)
+    Object.assign(next, onWorkdays(next.startDate!, next.endDate!, cal));
   assertRange(next.startDate, next.endDate);
   return next;
 }
-export function drawRange(first: string, last: string, isMilestone: boolean) {
-  return {
+export function drawRange(
+  first: string,
+  last: string,
+  isMilestone: boolean,
+  cal: WorkCalendar = CALENDAR_DAYS,
+) {
+  const range = {
     startDate: first < last ? first : last,
     endDate: isMilestone
       ? first < last
@@ -70,4 +113,5 @@ export function drawRange(first: string, last: string, isMilestone: boolean) {
         ? first
         : last,
   };
+  return onWorkdays(range.startDate, range.endDate, cal, isMilestone);
 }

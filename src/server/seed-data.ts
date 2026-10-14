@@ -1,4 +1,5 @@
 import { cascade } from "@/lib/scheduling/cascade";
+import { calendarOf } from "@/lib/scheduling/calendar";
 import { addDays, format, startOfWeek } from "date-fns";
 import { type ProjectDetail, type Role, COLOR_KEYS } from "@/lib/types";
 /**
@@ -74,7 +75,10 @@ const names = [
     "Future improvements",
   ],
 ];
-export function demoProject(count = 40): ProjectDetail {
+export function demoProject(
+  count = 40,
+  { skipWeekends = true } = {},
+): ProjectDetail {
   const start = startOfWeek(addDays(new Date(), -7), { weekStartsOn: 1 });
   const assignees = DEFAULT_PEOPLE.map(({ id, name, avatarColor, title }) => ({
     id,
@@ -131,7 +135,8 @@ export function demoProject(count = 40): ProjectDetail {
     createdAt: new Date().toISOString(),
     archived: false,
     groups,
-    tasks: cascade(tasks, dependencies),
+    skipWeekends,
+    tasks: cascade(tasks, dependencies, calendarOf({ skipWeekends })),
     dependencies,
     assignees,
     comments: [

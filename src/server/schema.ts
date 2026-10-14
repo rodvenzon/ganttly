@@ -88,6 +88,8 @@ const MIGRATIONS: string[][] = [
     `CREATE INDEX Project_owner ON Project(ownerKey, createdAt)`,
     `CREATE TABLE Meta (key TEXT NOT NULL PRIMARY KEY, value TEXT NOT NULL)`,
   ],
+  // 4: Working days. Existing projects keep counting calendar days.
+  [`ALTER TABLE Project ADD COLUMN skipWeekends INTEGER NOT NULL DEFAULT 0`],
 ];
 /** Quote a constant for a migration statement (migrations take no binds). */
 function sqlText(value: string) {

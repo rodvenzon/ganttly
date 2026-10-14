@@ -19,8 +19,8 @@ export function Shell({ children }: { children: React.ReactNode }) {
         ? me.error
         : null;
   return (
-    <div className="flex h-dvh min-h-[500px] flex-col">
-      <header className="flex h-24 shrink-0 items-center justify-between border-b border-brand-line bg-brand-stone px-5 sm:px-8">
+    <div className="flex h-dvh min-h-[500px] flex-col print:block print:h-auto print:min-h-0">
+      <header className="flex h-24 shrink-0 print:hidden items-center justify-between border-b border-brand-line bg-brand-stone px-5 sm:px-8">
         <Link href="/" aria-label="Ganttly projects">
           <Brand />
         </Link>
@@ -62,7 +62,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
         </nav>
       </header>
       {demo && (
-        <p className="shrink-0 border-b border-brand-line bg-brand-soft px-5 py-2 text-center text-xs text-brand-ink sm:px-8">
+        <p className="shrink-0 border-b border-brand-line bg-brand-soft print:hidden px-5 py-2 text-center text-xs text-brand-ink sm:px-8">
           <span className="mr-2 rounded-full bg-brand-accent px-2 py-0.5 text-[10px] font-semibold tracking-wider text-white">
             LIVE DEMO
           </span>

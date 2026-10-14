@@ -23,8 +23,8 @@ export function Drawer({
       }}
     >
       <Dialog.Portal>
-        <Dialog.Overlay className="fixed inset-0 z-40 bg-brand-ink/20 backdrop-blur-[1px]" />
-        <Dialog.Content className="fixed inset-y-0 right-0 z-50 flex w-full max-w-md flex-col border-l border-brand-line bg-brand-stone shadow-2xl">
+        <Dialog.Overlay className="fixed inset-0 z-40 print:hidden bg-brand-ink/20 backdrop-blur-[1px]" />
+        <Dialog.Content className="fixed inset-y-0 right-0 z-50 print:hidden flex w-full max-w-md flex-col border-l border-brand-line bg-brand-stone shadow-2xl">
           <div className="border-b border-brand-line px-6 py-5">
             <div className="flex items-center justify-between gap-4">
               <Dialog.Title className="text-xl font-medium">

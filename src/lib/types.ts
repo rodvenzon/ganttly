@@ -19,6 +19,8 @@ export interface Project {
   color: ColorKey;
   createdAt: string;
   archived: boolean;
+  /** Count working days only (Saturdays and Sundays are skipped). */
+  skipWeekends: boolean;
 }
 export interface TaskGroup {
   id: string;

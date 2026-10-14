@@ -1,3 +1,4 @@
+import { workdaysIn } from "@/lib/scheduling/calendar";
 import ExcelJS from "exceljs";
 import type { Assignee, ProjectDetail, Task } from "@/lib/types";
 /**
@@ -87,6 +88,7 @@ type Row = {
   assignees: string[];
   dependsOn: string[];
   comments: number;
+  skipWeekends: boolean;
 };
 function collect(projects: ProjectDetail[], today: string) {
   const rows: Row[] = [];
@@ -115,6 +117,7 @@ function collect(projects: ProjectDetail[], today: string) {
           .map((d) => names.get(d.predecessorTaskId) ?? "")
           .filter(Boolean),
         comments: p.comments.filter((c) => c.taskId === t.id).length,
+        skipWeekends: Boolean(p.skipWeekends),
       });
   }
   return { rows, people: [...people.values()] };
@@ -192,14 +195,21 @@ export async function buildReport(input: ReportInput): Promise<ArrayBuffer> {
       end: t.endDate ? dateOnly(t.endDate) : null,
       days:
         t.startDate && t.endDate
-          ? {
-              formula: `${L.end}${n}-${L.start}${n}+1`,
-              result:
-                (dateOnly(t.endDate).getTime() -
-                  dateOnly(t.startDate).getTime()) /
-                  DAY +
-                1,
-            }
+          ? r.skipWeekends
+            ? {
+                formula: `NETWORKDAYS(${L.start}${n},${L.end}${n})`,
+                result: workdaysIn(t.startDate, t.endDate, {
+                  skipWeekends: true,
+                }),
+              }
+            : {
+                formula: `${L.end}${n}-${L.start}${n}+1`,
+                result:
+                  (dateOnly(t.endDate).getTime() -
+                    dateOnly(t.startDate).getTime()) /
+                    DAY +
+                  1,
+              }
           : null,
       progress: t.percentComplete / 100,
       status: r.status,

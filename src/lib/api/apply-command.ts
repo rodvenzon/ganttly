@@ -1,5 +1,6 @@
 import type { ProjectDetail, Task } from "@/lib/types";
 import { cascade } from "@/lib/scheduling/cascade";
+import { calendarOf } from "@/lib/scheduling/calendar";
 import type { Command } from "./commands";
 function requireTask(p: ProjectDetail, id: string) {
   const task = p.tasks.find((t) => t.id === id);
@@ -143,8 +144,10 @@ export function applyCommand(
       if (command.name !== undefined) p.name = command.name;
       if (command.color !== undefined) p.color = command.color;
       if (command.archived !== undefined) p.archived = command.archived;
+      if (command.skipWeekends !== undefined)
+        p.skipWeekends = command.skipWeekends;
       break;
   }
-  p.tasks = cascade(p.tasks, p.dependencies);
+  p.tasks = cascade(p.tasks, p.dependencies, calendarOf(p));
   return p;
 }

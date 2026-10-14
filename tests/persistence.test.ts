@@ -17,7 +17,7 @@ const dir = mkdtempSync(join(tmpdir(), "ganttly-tests-")),
 beforeAll(async () => {
   resetSchemaCache();
   await ensureSchema(db, { seed: false });
-  await seedProject(db, demoProject());
+  await seedProject(db, demoProject(40, { skipWeekends: false }));
 }, 30000);
 afterAll(() => {
   db.close();
@@ -178,5 +178,21 @@ describe("transactional SQLite persistence", () => {
     expect(await exists("Task", "new-task")).toBe(false);
     expect(await exists("Comment", "new-comment")).toBe(false);
     expect(await exists("Dependency", "new-link")).toBe(false);
+  });
+});
+describe("working days are saved", () => {
+  it("stores the switch and the moved dates across a new connection", async () => {
+    const result = await run({ type: "project.update", skipWeekends: true });
+    const connection = localDb(url);
+    try {
+      const persisted = await readProject(connection, "demo-project");
+      expect(persisted.skipWeekends).toBe(true);
+      expect(persisted).toEqual(result.project);
+      for (const t of persisted.tasks.filter((t) => t.startDate))
+        for (const d of [t.startDate!, t.endDate!])
+          expect([0, 6]).not.toContain(new Date(d + "T00:00").getDay());
+    } finally {
+      connection.close();
+    }
   });
 });

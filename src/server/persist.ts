@@ -111,14 +111,21 @@ export function persistStatements(
   if (
     before.name !== after.name ||
     before.color !== after.color ||
-    before.archived !== after.archived
+    before.archived !== after.archived ||
+    before.skipWeekends !== after.skipWeekends
   )
     out.push(
       db
         .prepare(
-          "UPDATE Project SET name = ?, color = ?, archived = ? WHERE id = ?",
+          "UPDATE Project SET name = ?, color = ?, archived = ?, skipWeekends = ? WHERE id = ?",
         )
-        .bind(after.name, after.color, after.archived ? 1 : 0, before.id),
+        .bind(
+          after.name,
+          after.color,
+          after.archived ? 1 : 0,
+          after.skipWeekends ? 1 : 0,
+          before.id,
+        ),
     );
   const newGroups = added(before.groups, after.groups);
   if (newGroups.length) out.push(insertGroups(db, newGroups));

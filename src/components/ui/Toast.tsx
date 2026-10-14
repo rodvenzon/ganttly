@@ -14,7 +14,7 @@ export function Toast() {
   return (
     <div
       role="status"
-      className="fixed bottom-6 left-1/2 z-[80] flex max-w-[90vw] -translate-x-1/2 items-center gap-4 rounded-lg bg-brand-ink px-5 py-3 text-sm text-white shadow-xl"
+      className="fixed bottom-6 left-1/2 z-[80] print:hidden flex max-w-[90vw] -translate-x-1/2 items-center gap-4 rounded-lg bg-brand-ink px-5 py-3 text-sm text-white shadow-xl"
     >
       <span>{message}</span>
       <button aria-label="Dismiss notification" onClick={() => notify("")}>

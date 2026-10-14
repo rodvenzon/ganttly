@@ -11,9 +11,16 @@ export async function createProject(
   await db.batch([
     db
       .prepare(
-        "INSERT INTO Project (id, name, color, createdAt, archived, revision, ownerKey) VALUES (?, ?, ?, ?, 0, 0, ?)",
+        "INSERT INTO Project (id, name, color, createdAt, archived, skipWeekends, revision, ownerKey) VALUES (?, ?, ?, ?, 0, ?, 0, ?)",
       )
-      .bind(data.id, data.name, data.color, new Date().toISOString(), ownerKey),
+      .bind(
+        data.id,
+        data.name,
+        data.color,
+        new Date().toISOString(),
+        data.skipWeekends ? 1 : 0,
+        ownerKey,
+      ),
     db
       .prepare(
         "INSERT INTO TaskGroup (id, projectId, name, sortOrder) VALUES (?, ?, ?, 0)",

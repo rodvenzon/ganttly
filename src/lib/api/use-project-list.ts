@@ -7,13 +7,20 @@ import { request, fetchProject, type ProjectEnvelope } from "./client";
 import type { ProjectSummary, ColorKey } from "@/lib/types";
 import { useUI } from "@/store/ui";
 type Input =
-  | { type: "create"; id: string; name: string; color: ColorKey }
+  | {
+      type: "create";
+      id: string;
+      name: string;
+      color: ColorKey;
+      skipWeekends: boolean;
+    }
   | {
       type: "update";
       id: string;
       name?: string;
       color?: ColorKey;
       archived?: boolean;
+      skipWeekends?: boolean;
     };
 export function useProjectList() {
   const cache = useQueryClient(),
@@ -29,6 +36,7 @@ export function useProjectList() {
             id: input.id,
             name: input.name,
             color: input.color,
+            skipWeekends: input.skipWeekends,
           }),
         });
       const current = await fetchProject(input.id);
@@ -36,6 +44,7 @@ export function useProjectList() {
         name: input.name,
         color: input.color,
         archived: input.archived,
+        skipWeekends: input.skipWeekends,
       };
       return request<ProjectEnvelope>(
         `/api/projects/${encodeURIComponent(input.id)}/commands`,
@@ -59,6 +68,7 @@ export function useProjectList() {
                 name: input.name,
                 color: input.color,
                 archived: false,
+                skipWeekends: input.skipWeekends,
                 createdAt: new Date().toISOString(),
                 taskCount: 0,
                 completedCount: 0,

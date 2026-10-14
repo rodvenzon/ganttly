@@ -13,19 +13,27 @@ export function ProjectForm({
   onClose: () => void;
 }) {
   const [name, setName] = useState(project?.name ?? ""),
-    [color, setColor] = useState<ColorKey>(project?.color ?? "lagoon");
+    [color, setColor] = useState<ColorKey>(project?.color ?? "lagoon"),
+    [skipWeekends, setSkipWeekends] = useState(project?.skipWeekends ?? true);
   const { save, busy } = useProjectList();
   async function submit(event: FormEvent) {
     event.preventDefault();
     if (
       await save(
         project
-          ? { type: "update", id: project.id, name: name.trim(), color }
+          ? {
+              type: "update",
+              id: project.id,
+              name: name.trim(),
+              color,
+              ...(skipWeekends !== project.skipWeekends && { skipWeekends }),
+            }
           : {
               type: "create",
               id: crypto.randomUUID(),
               name: name.trim(),
               color,
+              skipWeekends,
             },
       )
     )
@@ -38,7 +46,7 @@ export function ProjectForm({
       title={project ? "Edit project" : "A new beginning"}
       description={
         project
-          ? "Update the name and timeline colour."
+          ? "Update the name, colour and working days."
           : "Give your next project a name, then shape the plan."
       }
     >
@@ -58,6 +66,28 @@ export function ProjectForm({
           Timeline colour
           <ColorPicker value={color} onChange={(c) => c && setColor(c)} />
         </div>
+        <label className="flex cursor-pointer items-start gap-3 rounded-lg border border-brand-line bg-white p-3">
+          <input
+            type="checkbox"
+            checked={skipWeekends}
+            onChange={(e) => setSkipWeekends(e.target.checked)}
+            className="mt-0.5 h-4 w-4 accent-brand-accent"
+          />
+          <span className="text-sm">
+            <span className="font-medium">Skip weekends</span>
+            <span className="mt-0.5 block text-xs leading-relaxed text-brand-muted">
+              Count working days only. Tasks start and end on weekdays, and
+              linked tasks move to the next weekday.
+              {project && skipWeekends !== project.skipWeekends && (
+                <span className="mt-1 block text-brand-ink">
+                  {skipWeekends
+                    ? "Tasks that start or end on a weekend will move onto weekdays when you save."
+                    : "Existing dates stay as they are; new moves will count every day."}
+                </span>
+              )}
+            </span>
+          </span>
+        </label>
         <Button
           type="submit"
           variant="primary"

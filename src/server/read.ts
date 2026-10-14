@@ -15,6 +15,7 @@ type ProjectRow = {
   color: string;
   createdAt: string;
   archived: number;
+  skipWeekends: number;
   revision: number;
 };
 type TaskRow = Omit<Task, "isMilestone" | "assigneeIds"> & {
@@ -68,6 +69,7 @@ export async function readProjectWithRevision(
     color: p.color as ColorKey,
     createdAt: p.createdAt,
     archived: Boolean(p.archived),
+    skipWeekends: Boolean(p.skipWeekends),
     groups: groups.results.map((g) => ({ ...g })),
     tasks: tasks.results.map((t) => ({
       id: t.id,
@@ -107,7 +109,7 @@ export async function listProjects(
 ): Promise<ProjectSummary[]> {
   const { results } = await db
     .prepare(
-      `SELECT p.id, p.name, p.color, p.createdAt, p.archived,
+      `SELECT p.id, p.name, p.color, p.createdAt, p.archived, p.skipWeekends,
          (SELECT COUNT(*) FROM Task t WHERE t.projectId = p.id) AS taskCount,
          (SELECT COUNT(*) FROM Task t WHERE t.projectId = p.id AND t.percentComplete = 100) AS completedCount
        FROM Project p WHERE p.ownerKey IS ? ORDER BY p.createdAt DESC, p.id`,
@@ -120,6 +122,7 @@ export async function listProjects(
     color: p.color as ColorKey,
     createdAt: p.createdAt,
     archived: Boolean(p.archived),
+    skipWeekends: Boolean(p.skipWeekends),
     taskCount: Number(p.taskCount),
     completedCount: Number(p.completedCount),
   }));

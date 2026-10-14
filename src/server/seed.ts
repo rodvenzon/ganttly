@@ -24,7 +24,7 @@ export function seedStatements(
       .bind(json(seed.assignees)),
     db
       .prepare(
-        "INSERT INTO Project (id, name, color, createdAt, archived, revision, ownerKey) VALUES (?, ?, ?, ?, ?, 0, ?)",
+        "INSERT INTO Project (id, name, color, createdAt, archived, skipWeekends, revision, ownerKey) VALUES (?, ?, ?, ?, ?, ?, 0, ?)",
       )
       .bind(
         seed.id,
@@ -32,6 +32,7 @@ export function seedStatements(
         seed.color,
         seed.createdAt,
         seed.archived ? 1 : 0,
+        seed.skipWeekends ? 1 : 0,
         ownerKey,
       ),
     insertGroups(db, seed.groups),

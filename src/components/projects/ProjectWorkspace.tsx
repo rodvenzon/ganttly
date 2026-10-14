@@ -1,5 +1,8 @@
 "use client";
 import { ProjectStatus } from "./ProjectStatus";
+import { PrintTimeline } from "@/components/print/PrintTimeline";
+import { PrintButton } from "@/components/print/PrintButton";
+import { WorkdaysToggle } from "./WorkdaysToggle";
 import { TaskDrawer } from "@/components/tasks/TaskDrawer";
 import { AddWork } from "./AddWork";
 import { ExportReport } from "@/components/report/ExportReport";
@@ -29,44 +32,49 @@ export function ProjectWorkspace({ id }: { id: string }) {
             <Button onClick={() => query.refetch()}>Retry</Button>
           </div>
         ) : (
-          <div className="flex min-h-0 flex-1 flex-col p-4 sm:p-7">
-            <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
-              <div>
-                <p className="mb-2 text-xs tracking-[.2em] text-brand-muted">
-                  PROJECT TIMELINE
-                </p>
-                <h1 className="text-3xl font-medium tracking-tight">
-                  {query.data.project.name}
-                </h1>
-                <p className="mt-2 text-sm text-brand-muted">
-                  {query.data.project.tasks.length} tasks ·{" "}
-                  {query.data.project.groups.length} phases
-                </p>
-              </div>
-              <div className="flex flex-wrap items-center gap-3">
-                <ExportReport projectId={id} />
-                <AddWork project={query.data.project} />
-                <div className="flex gap-1 rounded-lg border border-brand-line bg-white p-1">
-                  {(Object.keys(ZOOMS) as Zoom[]).map((z) => (
-                    <Button
-                      key={z}
-                      variant={z === zoom ? "primary" : "ghost"}
-                      onClick={() => setZoom(z)}
-                      className="capitalize"
-                    >
-                      {z}
-                    </Button>
-                  ))}
+          <>
+            <PrintTimeline project={query.data.project} />
+            <div className="flex min-h-0 flex-1 flex-col p-4 sm:p-7 print:hidden">
+              <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
+                <div>
+                  <p className="mb-2 text-xs tracking-[.2em] text-brand-muted">
+                    PROJECT TIMELINE
+                  </p>
+                  <h1 className="text-3xl font-medium tracking-tight">
+                    {query.data.project.name}
+                  </h1>
+                  <p className="mt-2 text-sm text-brand-muted">
+                    {query.data.project.tasks.length} tasks ·{" "}
+                    {query.data.project.groups.length} phases
+                  </p>
+                </div>
+                <div className="flex flex-wrap items-center gap-3">
+                  <PrintButton />
+                  <ExportReport projectId={id} />
+                  <AddWork project={query.data.project} />
+                  <div className="flex gap-1 rounded-lg border border-brand-line bg-white p-1">
+                    {(Object.keys(ZOOMS) as Zoom[]).map((z) => (
+                      <Button
+                        key={z}
+                        variant={z === zoom ? "primary" : "ghost"}
+                        onClick={() => setZoom(z)}
+                        className="capitalize"
+                      >
+                        {z}
+                      </Button>
+                    ))}
+                  </div>
                 </div>
               </div>
+              <ProjectStatus archived={query.data.project.archived} />
+              <GanttChart project={query.data.project} />
+              <TaskDrawer project={query.data.project} />
+              <WorkdaysToggle
+                skipWeekends={query.data.project.skipWeekends}
+                archived={query.data.project.archived}
+              />
             </div>
-            <ProjectStatus archived={query.data.project.archived} />
-            <GanttChart project={query.data.project} />
-            <TaskDrawer project={query.data.project} />
-            <p className="py-3 text-xs text-brand-muted">
-              Calendar days · Weekends shaded · Dates snap to whole days
-            </p>
-          </div>
+          </>
         )}
         <Toast />
       </Shell>

@@ -62,6 +62,7 @@ export const commandSchema = z.discriminatedUnion("type", [
       name: name.optional(),
       color: z.enum(COLOR_KEYS).optional(),
       archived: z.boolean().optional(),
+      skipWeekends: z.boolean().optional(),
     })
     .strict(),
 ]);
@@ -73,5 +74,10 @@ export const commandRequest = z
   })
   .strict();
 export const createProjectSchema = z
-  .object({ id, name, color: z.enum(COLOR_KEYS) })
+  .object({
+    id,
+    name,
+    color: z.enum(COLOR_KEYS),
+    skipWeekends: z.boolean().optional(),
+  })
   .strict();
