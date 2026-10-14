@@ -1,0 +1,14 @@
+# Local preview of the Cloudflare build only (`pnpm pages:dev`).
+# Production is the Pages project "ganttly", with a D1 binding named DB
+# (database "ganttly-db") and DEMO_MODE=1 set in the dashboard.
+name = "ganttly"
+pages_build_output_dir = "out"
+compatibility_date = "2026-10-01"
+
+[vars]
+DEMO_MODE = "1"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "ganttly-db"
+database_id = "local-only"

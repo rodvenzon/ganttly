@@ -1,0 +1,23 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+@layer base {
+  body {
+    @apply bg-brand-stone font-sans text-brand-ink antialiased;
+  }
+  button,
+  input,
+  textarea,
+  select {
+    font: inherit;
+  }
+  button {
+    @apply disabled:cursor-not-allowed disabled:opacity-40;
+  }
+  :focus-visible {
+    @apply outline-2 outline-offset-2 outline-brand-accent;
+  }
+  ::selection {
+    @apply bg-brand-gold text-brand-ink;
+  }
+}

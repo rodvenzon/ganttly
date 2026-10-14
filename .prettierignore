@@ -1,0 +1,9 @@
+node_modules
+.next
+.open-next
+.wrangler
+.verification
+pnpm-lock.yaml
+BUILD_BRIEF.md
+cloudflare-env.d.ts
+prisma/*.db*
